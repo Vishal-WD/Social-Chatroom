@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Support Groups | Peer Support Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-image: url('ik.jpg'); 
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        .availability-dot {
+            width: 10px;
+            height: 10px;
+            display: inline-block;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .group-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .group-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-600">Peer Support Network</h1>
+            <div class="mt-4 w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 66%"></div>
+            </div>
+        </header>
+        
+        <main class="max-w-md mx-auto">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Available Support Groups</h2>
+            <p class="text-gray-600 mb-6 text-center">These groups match your profile and current availability</p>
+            
+            <div id="groups-container" class="space-y-4">
+            
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const groupsContainer = document.getElementById('groups-container');
+            const matchedGroups = JSON.parse(sessionStorage.getItem('matchedGroups'));
+            const username = sessionStorage.getItem('tempUsername');
+            
+            if (!matchedGroups || matchedGroups.length === 0) {
+                groupsContainer.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow-md text-center">
+                        <p class="text-gray-600">No matching groups available right now.</p>
+                        <button onclick="window.location.href='profile.html'" 
+                                class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                            Try different preferences
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            matchedGroups.forEach(group => {
+                const availabilityColor = group.members < group.capacity * 0.5 ? 'bg-green-500' : 
+                                        group.members < group.capacity * 0.8 ? 'bg-yellow-500' : 'bg-red-500';
+                
+                const groupElement = document.createElement('div');
+                groupElement.className = 'group-card bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer';
+                groupElement.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-lg text-blue-600">${group.topic}</h3>
+                            <p class="text-gray-600 text-sm mt-1">
+                                <span class="${availabilityColor} availability-dot"></span>
+                                ${group.members}/${group.capacity} members
+                            </p>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                ${group.tags.map(tag => `
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${tag}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-medium px-2 py-1 rounded-full 
+                                ${group.matchScore > 70 ? 'bg-green-100 text-green-800' : 
+                                  group.matchScore > 50 ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${group.matchScore}% match
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                groupElement.addEventListener('click', () => {
+                    sessionStorage.setItem('selectedGroup', JSON.stringify(group));
+                    window.location.href = 'chat.html';
+                });
+                
+                groupsContainer.appendChild(groupElement);
+            });
+        });
+    </script>
+</body>
+</html>
